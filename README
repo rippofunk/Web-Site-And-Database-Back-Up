@@ -1,0 +1,64 @@
+back up
+2 files: config.cfg and backUp.sh and this read me. 
+
+the config files can take comments.
+Comments are pound sign space.
+# is valid a comment line
+#is not a valid comment line
+see the comments in the file for its full usage
+
+required on host (the machine receiving the back up): 
+rsync
+ssh client 
+private ssh key
+required on client (the machine to be backed up):
+rsync
+ssh server
+public ssh key copied in to ~/.ssh/authorized_keys 
+
+the ideal set up would be a unified back up user for the databases. in case you
+have 5 databases with 5 users, create a read only user for all 5 databases and 
+use this user to connect. You only need "select" and "lock tables" for the
+permissions in order to pull the Database down. 
+
+read up on ssh password-less keys so you know what you are getting into. Its a 
+large security vulnerability that can be mitigated under the right 
+circumstances. worse case, we made a back up and now you can restore :) In this
+configuration that these scripts use you are backing up to a non exposed server
+in the most ideal circumstance so the private key should be protected. 
+
+backUp.sh
+lots of comments and descriptors in file. 
+its small but packs a huge punch. 
+run it on local Linux or OSX, potentially windows.
+it really is just using rsync and ssh to execute 
+the commands.
+what it does in order:
+rsyncs the public_html Dir
+create a database dump of all the data bases
+the user has access to. 
+gzips the file
+deletes the unziped file
+any files that are different get moved to a day of the week folder. 
+So if on mon you changed index.php the file that was on the back up server will
+be moved to the directory called shellUser@server1 where 1 is the day of the
+week. if a month later you made the next change to that file on a Tues, the 
+current one would be moved to shellUser@server.com2 so by luck you have just
+saved a over a months of back ups on that one file. worse case scenario your 
+back ups go back one day.
+The database file will always look new to rsync, and therefore will only go
+back 7 days. 
+change the backupdir parameter in the top of backup.sh to get more spread.
+using the date variable you cold easily store 365 days of back ups.
+
+running the script.
+once you have everything all set up, its time to run. i use cron with a syntax
+like /path/backUp.sh > logFile. 
+this will over write the log file everyday. 
+if you wanted to keep a lot of logging you could easily do 
+/path/backUp.sh >> logFile this will cat the file versus over writing. beware 
+if it gets to big it will be unwieldy. 
+the commands should not output unless there is an error. rsync has the -q 
+option set, suppressing non errors. 
+if you have questions, email me, i would love to help you out or hear your complaints, praises or ideas. 
+me@rippofunkcreations.com
